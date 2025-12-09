@@ -1,5 +1,11 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "./ui/dialog";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -7,8 +13,8 @@ import { Plus, Calendar } from "lucide-react";
 import { Deadline } from "@/types/study";
 
 interface AddDeadlineModalProps {
-  classes: { id: string; name: string; color: 'purple' | 'orange' | 'cyan' | 'pink' }[];
-  onAdd: (deadline: Omit<Deadline, 'id'>) => void;
+  classes: { id: string; name: string; color: "purple" | "orange" | "cyan" | "pink" }[];
+  onAdd: (deadline: Omit<Deadline, "id">) => void;
 }
 
 export function AddDeadlineModal({ classes, onAdd }: AddDeadlineModalProps) {
@@ -40,9 +46,8 @@ export function AddDeadlineModal({ classes, onAdd }: AddDeadlineModalProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="gradient" className="gap-2">
-          <Plus className="h-4 w-4" />
-          Add Deadline
+        <Button variant="ghost" size="sm" className="h-7 px-2 text-xs">
+          <Plus className="h-3 w-3" />
         </Button>
       </DialogTrigger>
       <DialogContent className="glass-card border-border/50 sm:max-w-md">
@@ -61,6 +66,7 @@ export function AddDeadlineModal({ classes, onAdd }: AddDeadlineModalProps) {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="bg-secondary/50 border-border/50"
+              maxLength={100}
             />
           </div>
           <div className="space-y-2">

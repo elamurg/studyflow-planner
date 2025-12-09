@@ -1,3 +1,14 @@
+export interface TimeBlock {
+  id: string;
+  title: string;
+  description: string;
+  duration: number; // in minutes
+  startHour: number; // 0-23
+  day: number; // 0-6 (Sunday-Saturday)
+  color: 'purple' | 'orange' | 'cyan' | 'pink';
+  completed: boolean;
+}
+
 export interface Deadline {
   id: string;
   title: string;

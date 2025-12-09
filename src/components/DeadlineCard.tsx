@@ -43,7 +43,7 @@ export function DeadlineCard({ deadline, onRemove }: DeadlineCardProps) {
   }, [deadline.dueDate]);
 
   return (
-    <div className={`relative p-5 rounded-2xl ${colorClasses[deadline.color]} animate-slide-up`}>
+    <div className={`relative p-4 rounded-2xl ${colorClasses[deadline.color]} animate-slide-up`}>
       <Button
         variant="ghost"
         size="icon"
@@ -53,10 +53,10 @@ export function DeadlineCard({ deadline, onRemove }: DeadlineCardProps) {
         <X className="h-4 w-4" />
       </Button>
       
-      <p className="text-xs font-medium uppercase tracking-wider text-primary-foreground/70 mb-1">
+      <p className="text-[10px] font-medium uppercase tracking-wider text-primary-foreground/70 mb-0.5">
         {deadline.className}
       </p>
-      <h3 className="font-display text-lg font-semibold text-primary-foreground mb-4">
+      <h3 className="font-display text-sm font-semibold text-primary-foreground mb-3">
         {deadline.title}
       </h3>
       
@@ -65,11 +65,11 @@ export function DeadlineCard({ deadline, onRemove }: DeadlineCardProps) {
           Overdue!
         </p>
       ) : (
-        <div className="flex gap-3">
-          <TimeUnit value={timeLeft.days} label="days" />
-          <TimeUnit value={timeLeft.hours} label="hrs" />
-          <TimeUnit value={timeLeft.minutes} label="min" />
-          <TimeUnit value={timeLeft.seconds} label="sec" />
+        <div className="flex gap-2">
+          <TimeUnit value={timeLeft.days} label="d" />
+          <TimeUnit value={timeLeft.hours} label="h" />
+          <TimeUnit value={timeLeft.minutes} label="m" />
+          <TimeUnit value={timeLeft.seconds} label="s" />
         </div>
       )}
     </div>
@@ -79,14 +79,14 @@ export function DeadlineCard({ deadline, onRemove }: DeadlineCardProps) {
 function TimeUnit({ value, label }: { value: number; label: string }) {
   return (
     <div className="text-center">
-      <div className="bg-primary-foreground/20 backdrop-blur-sm rounded-lg px-3 py-2">
-        <span className="font-display text-xl font-bold text-primary-foreground">
-          {value.toString().padStart(2, '0')}
+      <div className="bg-primary-foreground/20 backdrop-blur-sm rounded-lg px-2 py-1">
+        <span className="font-display text-base font-bold text-primary-foreground">
+          {value.toString().padStart(2, "0")}
+        </span>
+        <span className="text-[10px] text-primary-foreground/70 ml-0.5">
+          {label}
         </span>
       </div>
-      <span className="text-[10px] uppercase tracking-wider text-primary-foreground/70 mt-1">
-        {label}
-      </span>
     </div>
   );
 }
