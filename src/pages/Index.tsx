@@ -3,116 +3,74 @@ import { TimeBlock, Deadline, ClassSubject, Note, Task } from "@/types/study";
 import { TimeBlockCalendar } from "@/components/TimeBlockCalendar";
 import { Sidebar } from "@/components/Sidebar";
 import { AddTimeBlockModal } from "@/components/AddTimeBlockModal";
-import { GraduationCap } from "lucide-react";
-
-// Sample data
-const initialClasses: ClassSubject[] = [
-  {
-    id: "1",
-    name: "Mathematics",
-    color: "purple",
-    tasks: [
-      { id: "t1", title: "Complete Chapter 5 exercises", completed: true },
-      { id: "t2", title: "Review quadratic formulas", completed: false },
-    ],
-  },
-  {
-    id: "2",
-    name: "Computer Science",
-    color: "cyan",
-    tasks: [
-      { id: "t4", title: "Finish algorithm assignment", completed: true },
-      { id: "t5", title: "Study data structures", completed: false },
-    ],
-  },
-  {
-    id: "3",
-    name: "Physics",
-    color: "orange",
-    tasks: [
-      { id: "t7", title: "Lab report on optics", completed: false },
-    ],
-  },
-];
-
-const initialDeadlines: Deadline[] = [
-  {
-    id: "d1",
-    title: "Final Exam",
-    className: "Mathematics",
-    dueDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
-    color: "purple",
-  },
-  {
-    id: "d2",
-    title: "Project Submission",
-    className: "Computer Science",
-    dueDate: new Date(Date.now() + 2 * 24 * 60 * 60 * 1000),
-    color: "cyan",
-  },
-];
-
-const initialNotes: Note[] = [
-  {
-    id: "n1",
-    content: "Review integration by parts before exam!",
-    createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
-  },
-];
-
-const today = new Date().getDay();
-const initialTimeBlocks: TimeBlock[] = [
-  {
-    id: "tb1",
-    title: "Math Study Session",
-    description: "Focus on calculus chapter 5 problems",
-    duration: 60,
-    startHour: 9,
-    day: today,
-    color: "purple",
-    completed: false,
-  },
-  {
-    id: "tb2",
-    title: "CS Project Work",
-    description: "Implement the sorting algorithm",
-    duration: 90,
-    startHour: 11,
-    day: today,
-    color: "cyan",
-    completed: false,
-  },
-  {
-    id: "tb3",
-    title: "Physics Lab Prep",
-    description: "Read through the optics experiment procedure",
-    duration: 45,
-    startHour: 14,
-    day: today,
-    color: "orange",
-    completed: true,
-  },
-];
+import { GraduationCap, Loader2 } from "lucide-react";
+import {
+  useTimeBlocks,
+  useCreateTimeBlock,
+  useUpdateTimeBlock,
+  useDeleteTimeBlock,
+  useMoveTimeBlock,
+  useToggleTimeBlockComplete,
+  useDeadlines,
+  useCreateDeadline,
+  useDeleteDeadline,
+  useClasses,
+  useCreateClass,
+  useCreateTask,
+  useToggleTask,
+  useDeleteTask,
+  useNotes,
+  useCreateNote,
+  useDeleteNote,
+} from "@/hooks/useStudyApi";
 
 const Index = () => {
-  const [timeBlocks, setTimeBlocks] = useState<TimeBlock[]>(initialTimeBlocks);
-  const [classes, setClasses] = useState<ClassSubject[]>(initialClasses);
-  const [deadlines, setDeadlines] = useState<Deadline[]>(initialDeadlines);
-  const [notes, setNotes] = useState<Note[]>(initialNotes);
+  // Modal state
   const [editingBlock, setEditingBlock] = useState<TimeBlock | null>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
 
-  // Time Block handlers
+  // ==========================================================================
+  // API Queries - Fetch data from backend
+  // ==========================================================================
+  const { data: timeBlocks = [], isLoading: loadingBlocks } = useTimeBlocks();
+  const { data: deadlines = [], isLoading: loadingDeadlines } = useDeadlines();
+  const { data: classes = [], isLoading: loadingClasses } = useClasses();
+  const { data: notes = [], isLoading: loadingNotes } = useNotes();
+
+  // ==========================================================================
+  // API Mutations - Save changes to backend
+  // ==========================================================================
+  
+  // Time Block mutations
+  const createTimeBlock = useCreateTimeBlock();
+  const updateTimeBlock = useUpdateTimeBlock();
+  const deleteTimeBlock = useDeleteTimeBlock();
+  const moveTimeBlock = useMoveTimeBlock();
+  const toggleTimeBlockComplete = useToggleTimeBlockComplete();
+
+  // Deadline mutations
+  const createDeadline = useCreateDeadline();
+  const removeDeadline = useDeleteDeadline();
+
+  // Class & Task mutations
+  const createClass = useCreateClass();
+  const createTask = useCreateTask();
+  const toggleTask = useToggleTask();
+  const deleteTask = useDeleteTask();
+
+  // Note mutations
+  const createNote = useCreateNote();
+  const removeNote = useDeleteNote();
+
+  // ==========================================================================
+  // Time Block Handlers
+  // ==========================================================================
   const handleAddTimeBlock = (block: Omit<TimeBlock, "id">) => {
-    setTimeBlocks([...timeBlocks, { ...block, id: crypto.randomUUID() }]);
+    createTimeBlock.mutate(block);
   };
 
   const handleMoveBlock = (id: string, newDay: number, newHour: number) => {
-    setTimeBlocks(
-      timeBlocks.map((block) =>
-        block.id === id ? { ...block, day: newDay, startHour: newHour } : block
-      )
-    );
+    moveTimeBlock.mutate({ id, newDay, newHour });
   };
 
   const handleEditBlock = (block: TimeBlock) => {
@@ -121,56 +79,94 @@ const Index = () => {
   };
 
   const handleUpdateBlock = (updatedBlock: TimeBlock) => {
-    setTimeBlocks(
-      timeBlocks.map((block) =>
-        block.id === updatedBlock.id ? updatedBlock : block
-      )
-    );
+    updateTimeBlock.mutate(updatedBlock);
     setEditingBlock(null);
     setEditModalOpen(false);
   };
 
   const handleDeleteBlock = (id: string) => {
-    setTimeBlocks(timeBlocks.filter((block) => block.id !== id));
+    deleteTimeBlock.mutate(id);
   };
 
   const handleToggleBlockComplete = (id: string) => {
-    setTimeBlocks(
-      timeBlocks.map((block) =>
-        block.id === id ? { ...block, completed: !block.completed } : block
-      )
-    );
+    const block = timeBlocks.find((b) => b.id === id);
+    if (block) {
+      toggleTimeBlockComplete.mutate({ id, completed: !block.completed });
+    }
   };
 
-  // Deadline handlers
+  // ==========================================================================
+  // Deadline Handlers
+  // ==========================================================================
   const handleAddDeadline = (deadline: Omit<Deadline, "id">) => {
-    setDeadlines([...deadlines, { ...deadline, id: crypto.randomUUID() }]);
+    createDeadline.mutate(deadline);
   };
 
   const handleRemoveDeadline = (id: string) => {
-    setDeadlines(deadlines.filter((d) => d.id !== id));
+    removeDeadline.mutate(id);
   };
 
-  // Class handlers
+  // ==========================================================================
+  // Class Handlers
+  // ==========================================================================
   const handleAddClass = (classData: Omit<ClassSubject, "id" | "tasks">) => {
-    setClasses([...classes, { ...classData, id: crypto.randomUUID(), tasks: [] }]);
+    createClass.mutate(classData);
   };
 
   const handleUpdateTasks = (classId: string, tasks: Task[]) => {
-    setClasses(classes.map((c) => (c.id === classId ? { ...c, tasks } : c)));
+    // Find the class to get its name
+    const classSubject = classes.find((c) => c.id === classId);
+    if (!classSubject) return;
+
+    // Find tasks that were toggled or added
+    const existingTasks = classSubject.tasks;
+    
+    // Check for toggled tasks
+    tasks.forEach((task) => {
+      const existingTask = existingTasks.find((t) => t.id === task.id);
+      if (existingTask && existingTask.completed !== task.completed) {
+        // Task was toggled
+        toggleTask.mutate({ id: task.id, completed: task.completed });
+      } else if (!existingTask && task.id.startsWith('temp-')) {
+        // New task (has temporary ID)
+        createTask.mutate({ title: task.title, subject: classSubject.name });
+      }
+    });
+
+    // Check for deleted tasks
+    existingTasks.forEach((existingTask) => {
+      if (!tasks.find((t) => t.id === existingTask.id)) {
+        deleteTask.mutate(existingTask.id);
+      }
+    });
   };
 
-  // Note handlers
+  // ==========================================================================
+  // Note Handlers
+  // ==========================================================================
   const handleAddNote = (content: string) => {
-    setNotes([
-      { id: crypto.randomUUID(), content, createdAt: new Date() },
-      ...notes,
-    ]);
+    createNote.mutate(content);
   };
 
   const handleRemoveNote = (id: string) => {
-    setNotes(notes.filter((n) => n.id !== id));
+    removeNote.mutate(id);
   };
+
+  // ==========================================================================
+  // Loading State
+  // ==========================================================================
+  const isLoading = loadingBlocks || loadingDeadlines || loadingClasses || loadingNotes;
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-muted-foreground">Loading your study plan...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background flex">
